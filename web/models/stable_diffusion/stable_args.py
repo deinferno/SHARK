@@ -252,5 +252,35 @@ p.add_argument(
 )
 
 ##############################################################################
+### Hacky flags
+##############################################################################
+
+p.add_argument(
+    "--no_browser",
+    default=False,
+    action=argparse.BooleanOptionalAction,
+    help="flag for disabling browser link opening",
+)
+
+p.add_argument(
+    "--cpu_clip",
+    default=False,
+    action=argparse.BooleanOptionalAction,
+    help="flag for forcing CLIP model to run on cpu",
+)
+
+p.add_argument(
+    "--cpu_vae",
+    default=False,
+    action=argparse.BooleanOptionalAction,
+    help="flag for forcing VAE model to run on cpu",
+)
+
+p.add_argument(
+    "--onnx_vae",
+    type=str,
+    default="",
+    help="flag for setting path of ONNX framework vae",
+)
 
 args = p.parse_args()

@@ -16,6 +16,8 @@ def _compile_module(shark_module, model_name, extra_args=[]):
             if "://" not in args.device
             else "-".join(args.device.split("://"))
         )
+        if ((args.cpu_clip and "clip" in model_name) or (args.cpu_vae and "vae" in model_name)):
+            device = "cpu"
         extended_name = "{}_{}".format(model_name, device)
         vmfb_path = os.path.join(os.getcwd(), extended_name + ".vmfb")
         if args.load_vmfb and os.path.isfile(vmfb_path) and not args.save_vmfb:
@@ -52,9 +54,11 @@ def get_shark_model(tank_url, model_name, extra_args=[]):
         tank_url=tank_url,
         frontend="torch",
     )
+
     shark_module = SharkInference(
-        mlir_model, device=args.device, mlir_dialect="linalg"
+        mlir_model, device="cpu" if ((args.cpu_clip and "clip" in model_name) or (args.cpu_vae and "vae" in model_name)) else args.device, mlir_dialect="linalg"
     )
+
     return _compile_module(shark_module, model_name, extra_args)
 
 
@@ -65,7 +69,7 @@ def compile_through_fx(model, inputs, model_name, extra_args=[]):
 
     shark_module = SharkInference(
         mlir_module,
-        device=args.device,
+        device="cpu" if ((args.cpu_clip and "clip" in model_name) or (args.cpu_vae and "vae" in model_name)) else args.device,
         mlir_dialect="linalg",
     )
 

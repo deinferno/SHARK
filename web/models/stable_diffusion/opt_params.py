@@ -73,6 +73,23 @@ def get_unet():
 
 
 def get_vae():
+    if args.onnx_vae != "":
+        from diffusers import OnnxRuntimeModel
+        import numpy as np
+
+        class VaeModel():
+            def __init__(self):
+                self.vae_decoder = OnnxRuntimeModel.from_pretrained(args.onnx_vae, provider = "CPUExecutionProvider" if args.cpu_vae else "DmlExecutionProvider")
+
+            def __call__(self, str, input):
+                input = input[0]
+                input = 1 / 0.18215 * np.float32(input)
+                x = self.vae_decoder(latent_sample=input)[0]
+                x = np.clip((x / 2 + 0.5), 0, 1)
+                x = x * 255
+                return np.half(np.round(x))
+
+        return VaeModel()
     # Tuned model is present only for `fp16` precision.
     is_tuned = "tuned" if args.use_tuned else "untuned"
     is_base = "/base" if args.use_base_vae else ""
